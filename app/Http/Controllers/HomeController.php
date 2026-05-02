@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnakYatim;
+use App\Models\Berita;
 
 class HomeController extends Controller
 {
@@ -13,6 +14,9 @@ class HomeController extends Controller
         // Hitung tahun berdiri dari April 1992
         $tahunBerdiri = \Carbon\Carbon::create(1992, 4, 1)->diffInYears(now());
 
-        return view('home', compact('totalAnak', 'tahunBerdiri'));
+        // Ambil 3 berita terbaru yang sudah published
+        $beritaTerbaru = Berita::latest3()->get();
+
+        return view('home', compact('totalAnak', 'tahunBerdiri', 'beritaTerbaru'));
     }
 }

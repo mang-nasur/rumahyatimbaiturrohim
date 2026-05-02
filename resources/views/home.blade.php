@@ -880,10 +880,55 @@
       transform: scale(1.1) translateY(-3px); 
       box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5); 
     }
+
+    /* Tombol Donasi Melayang */
+    .float-donate {
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #d4a017, #e8b820);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 18px 12px 14px;
+      border-radius: 50px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      box-shadow: 0 6px 24px rgba(212, 160, 23, 0.5);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .float-donate:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 12px 36px rgba(212, 160, 23, 0.6);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .float-donate::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50px;
+      background: inherit;
+      z-index: -1;
+      animation: donatePulse 2.5s ease-out infinite;
+    }
+
+    @keyframes donatePulse {
+      0%   { transform: scale(1); opacity: 0.7; }
+      70%  { transform: scale(1.3); opacity: 0; }
+      100% { transform: scale(1.3); opacity: 0; }
+    }
     
     #back-top { 
       position: fixed; 
-      bottom: 100px; 
+      bottom: 170px; 
       right: 30px; 
       width: 48px; 
       height: 48px; 
@@ -983,6 +1028,13 @@
         grid-template-columns: 1fr; 
       }
       
+      .float-donate {
+        bottom: 90px;
+        right: 16px;
+        padding: 10px 14px 10px 12px;
+        font-size: 0.82rem;
+      }
+
       .float-wa { 
         bottom: 20px; 
         right: 20px; 
@@ -991,7 +1043,7 @@
       }
       
       #back-top { 
-        bottom: 85px; 
+        bottom: 155px; 
         right: 20px; 
       }
     }
@@ -1016,7 +1068,6 @@
     <li><a href="#program">Program</a></li>
     <li><a href="#galeri">Galeri</a></li>
     <li><a href="#berita">Berita</a></li>
-    <li><a href="#donasi" class="nav-cta">💝 Donasi</a></li>
   </ul>
   <div class="hamburger" id="hamburger">
     <span></span>
@@ -1170,35 +1221,37 @@
     <p>Ikuti perkembangan dan kegiatan terbaru dari Rumah Yatim Baiturrohim.</p>
     <div class="divider"></div>
   </div>
-  <div class="berita-grid">
-    <div class="berita-card">
-      <div class="berita-img">📰</div>
-      <div class="berita-content">
-        <div class="berita-date">15 Januari 2025</div>
-        <h3>Perayaan Milad Yayasan ke-32</h3>
-        <p>Alhamdulillah, kami merayakan 32 tahun pengabdian dalam melayani anak yatim dan dhuafa dengan penuh syukur.</p>
-        <a href="#" class="berita-link">Baca Selengkapnya →</a>
-      </div>
-    </div>
-    <div class="berita-card">
-      <div class="berita-img">🎓</div>
-      <div class="berita-content">
-        <div class="berita-date">10 Januari 2025</div>
-        <h3>25 Anak Asuh Lulus Perguruan Tinggi</h3>
-        <p>Prestasi membanggakan! 25 anak asuh kami berhasil menyelesaikan studi S1 dengan nilai memuaskan.</p>
-        <a href="#" class="berita-link">Baca Selengkapnya →</a>
-      </div>
-    </div>
-    <div class="berita-card">
-      <div class="berita-img">🏆</div>
-      <div class="berita-content">
-        <div class="berita-date">5 Januari 2025</div>
-        <h3>Juara Lomba Tahfidz Tingkat Nasional</h3>
-        <p>Bangga! Santri kami meraih juara 1 lomba tahfidz Quran 30 juz tingkat nasional.</p>
-        <a href="#" class="berita-link">Baca Selengkapnya →</a>
-      </div>
-    </div>
+
+  @if($beritaTerbaru->isEmpty())
+  <div style="text-align:center; padding: 40px 0; color: var(--gray-600);">
+    <div style="font-size:3rem; margin-bottom:12px;">📰</div>
+    <p>Belum ada berita yang dipublikasikan.</p>
   </div>
+  @else
+  <div class="berita-grid">
+    @foreach($beritaTerbaru as $b)
+    <div class="berita-card">
+      <div class="berita-img">
+        @if($b->foto)
+          <img src="{{ $b->foto_url }}" alt="{{ $b->judul }}"
+               style="width:100%;height:100%;object-fit:cover;" />
+        @else
+          @php
+            $icons = ['Kegiatan'=>'🎉','Prestasi'=>'🏆','Donasi'=>'💝','Pengumuman'=>'📢','Ramadan'=>'🌙'];
+            echo $icons[$b->kategori] ?? '📰';
+          @endphp
+        @endif
+      </div>
+      <div class="berita-content">
+        <div class="berita-date">{{ $b->tanggal_format }}</div>
+        <h3>{{ $b->judul }}</h3>
+        <p>{{ $b->ringkasan_auto }}</p>
+        <a href="{{ route('berita.show', $b->slug) }}" class="berita-link">Baca Selengkapnya →</a>
+      </div>
+    </div>
+    @endforeach
+  </div>
+  @endif
 </section>
 
 <!-- === CONTACT SECTION === -->
@@ -1338,6 +1391,10 @@
 </footer>
 
 <!-- === FLOATING BUTTONS === -->
+<a class="float-donate" href="{{ route('donasi.create') }}" title="Donasi Sekarang">
+  <span style="font-size:1.1rem;line-height:1;">💝</span>
+  <span>Donasi</span>
+</a>
 <a class="float-wa" href="https://wa.me/6287774017804" target="_blank" rel="noopener" title="Hubungi via WhatsApp">💬</a>
 <button id="back-top" title="Kembali ke atas">↑</button>
 

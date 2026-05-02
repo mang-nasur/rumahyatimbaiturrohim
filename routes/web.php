@@ -5,8 +5,10 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AnakYatimController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardKeuanganController;
+use App\Http\Controllers\DonasiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ProfileController;
@@ -27,6 +29,27 @@ use App\Http\Controllers\UserController;
 // Halaman publik (company profile) — / dan /tentang sama-sama menampilkan beranda
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/tentang', fn() => redirect()->route('home'));
+
+// Donasi — publik, tidak perlu login
+Route::get('/donasi', [DonasiController::class, 'create'])->name('donasi.create');
+Route::post('/donasi', [DonasiController::class, 'store'])->name('donasi.store');
+Route::get('/donasi/konfirmasi', [DonasiController::class, 'konfirmasi'])->name('donasi.konfirmasi');
+Route::post('/donasi/selesai', [DonasiController::class, 'selesai'])->name('donasi.selesai');
+
+// Berita — manajemen (admin & staff) — HARUS sebelum route publik {slug}
+Route::middleware(['auth', 'role:admin,staff'])->group(function () {
+    Route::get('/berita',                  [BeritaController::class, 'index'])->name('berita.index');
+    Route::get('/berita/create',           [BeritaController::class, 'create'])->name('berita.create');
+    Route::post('/berita',                 [BeritaController::class, 'store'])->name('berita.store');
+    Route::get('/berita/{beritum}/edit',   [BeritaController::class, 'edit'])->name('berita.edit');
+    Route::put('/berita/{beritum}',        [BeritaController::class, 'update'])->name('berita.update');
+    Route::delete('/berita/{beritum}',     [BeritaController::class, 'destroy'])->name('berita.destroy');
+});
+
+// Berita — detail publik — HARUS setelah route admin agar 'create' tidak tertangkap sebagai slug
+Route::get('/berita/{slug}', [BeritaController::class, 'show'])
+    ->name('berita.show')
+    ->where('slug', '^(?!create$|edit$)[a-z0-9\-]+$');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
